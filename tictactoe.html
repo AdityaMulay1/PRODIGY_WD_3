@@ -1,4 +1,3 @@
-<!-- tictactoe.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,11 +7,12 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
+            margin: 20px; /* Increased space at the top */
         }
 
         .container {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             height: 100vh;
         }
@@ -31,11 +31,37 @@
             font-size: 24px;
             text-align: center;
             cursor: pointer;
-            transition: background-color 0.3s ease-in-out;
+            transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out; /* Smooth transition */
         }
 
         .cell:hover {
             background-color: #ddd; /* Light gray on hover */
+        }
+
+        #winner-message {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        #celebration-message {
+            margin-top: 10px;
+            font-size: 20px;
+            color: #27ae60; /* Green color for celebration */
+        }
+
+        #reset-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4, #fad0c4); /* Gradient of pastel colors */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease-in-out; /* Smooth transition */
+        }
+
+        #reset-button:hover {
+            background: linear-gradient(45deg, #a18cd1, #fbc2eb); /* Gradient of pastel colors on hover */
         }
     </style>
 </head>
@@ -44,12 +70,20 @@
         <div class="board" id="board">
             <!-- Cells will be dynamically added here by JavaScript -->
         </div>
+        <p id="winner-message"></p>
+        <p id="celebration-message"></p>
+        <button id="reset-button" onclick="resetGame()">Reset Game</button>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const board = document.getElementById('board');
+            const winnerMessage = document.getElementById('winner-message');
+            const celebrationMessage = document.getElementById('celebration-message');
+            const resetButton = document.getElementById('reset-button');
             let currentPlayer = 'X';
+            let gameBoard = ['', '', '', '', '', '', '', '', ''];
+            let gameActive = true;
 
             // Create 3x3 grid
             for (let i = 0; i < 9; i++) {
@@ -59,11 +93,63 @@
 
                 // Add click event listener
                 cell.addEventListener('click', () => {
-                    if (!cell.textContent) {
+                    if (gameActive && !cell.textContent) {
                         cell.textContent = currentPlayer;
-                        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                        cell.style.color = currentPlayer === 'X' ? '#3498db' : '#e74c3c'; /* Blue for X, Red for O */
+                        gameBoard[i] = currentPlayer;
+
+                        if (checkWin()) {
+                            winnerMessage.textContent = `${currentPlayer} wins!`;
+                            celebrationMessage.textContent = '🎉 Congratulations!';
+                            gameActive = false;
+                            resetButton.style.display = 'block';
+                        } else if (gameBoard.every((cell) => cell !== '')) {
+                            winnerMessage.textContent = 'It\'s a tie!';
+                            gameActive = false;
+                            resetButton.style.display = 'block';
+                        } else {
+                            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                        }
                     }
                 });
+            }
+
+            function checkWin() {
+                const winConditions = [
+                    [0, 1, 2],
+                    [3, 4, 5],
+                    [6, 7, 8],
+                    [0, 3, 6],
+                    [1, 4, 7],
+                    [2, 5, 8],
+                    [0, 4, 8],
+                    [2, 4, 6],
+                ];
+
+                return winConditions.some((condition) => {
+                    const [a, b, c] = condition;
+                    return gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c];
+                });
+            }
+
+            function resetGame() {
+                const cells = document.querySelectorAll('.cell');
+                const winnerMessage = document.getElementById('winner-message');
+                const celebrationMessage = document.getElementById('celebration-message');
+                const resetButton = document.getElementById('reset-button');
+
+                winnerMessage.textContent = '';
+                celebrationMessage.textContent = '';
+                resetButton.style.display = 'none';
+
+                cells.forEach(cell => {
+                    cell.textContent = '';
+                    cell.style.color = ''; // Reset text color
+                });
+
+                currentPlayer = 'X';
+                gameBoard = ['', '', '', '', '', '', '', '', ''];
+                gameActive = true;
             }
         });
     </script>
